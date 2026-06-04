@@ -21,22 +21,22 @@ export default async function ProductPage({ params }: Props) {
   const product = await getProduct(slug);
   if (!product) notFound();
 
-  const categories      = getEmbeddedTerms(product, TERM_IDX.category);
-  const tags            = getEmbeddedTerms(product, TERM_IDX.tag);
-  const series          = getEmbeddedTerms(product, TERM_IDX.series);
-  const capMaterial     = getEmbeddedTerms(product, TERM_IDX.capMaterial);
-  const actuatorMat     = getEmbeddedTerms(product, TERM_IDX.actuatorMaterial);
-  const pumpBodyMat     = getEmbeddedTerms(product, TERM_IDX.pumpBodyMaterial);
-  const bottleMat       = getEmbeddedTerms(product, TERM_IDX.bottleMaterial);
-  const sustainable     = getEmbeddedTerms(product, TERM_IDX.sustainable);
-  const markets         = getEmbeddedTerms(product, TERM_IDX.markets);
+  const categories  = getEmbeddedTerms(product, TERM_IDX.category);
+  const tags        = getEmbeddedTerms(product, TERM_IDX.tag);
+  const series      = getEmbeddedTerms(product, TERM_IDX.series);
+  const capMat      = getEmbeddedTerms(product, TERM_IDX.capMaterial);
+  const actuatorMat = getEmbeddedTerms(product, TERM_IDX.actuatorMaterial);
+  const pumpBodyMat = getEmbeddedTerms(product, TERM_IDX.pumpBodyMaterial);
+  const bottleMat   = getEmbeddedTerms(product, TERM_IDX.bottleMaterial);
+  const sustainable = getEmbeddedTerms(product, TERM_IDX.sustainable);
+  const markets     = getEmbeddedTerms(product, TERM_IDX.markets);
 
   const neck  = product.meta?.poc_neck ?? '';
   const specs = product.meta?.poc_specs ?? [];
 
   const detailRows = [
     { label: 'Series',             terms: series },
-    { label: 'Cap Material',       terms: capMaterial },
+    { label: 'Cap Material',       terms: capMat },
     { label: 'Actuator Material',  terms: actuatorMat },
     { label: 'Pump Body Material', terms: pumpBodyMat },
     { label: 'Bottle Material',    terms: bottleMat },
@@ -45,6 +45,7 @@ export default async function ProductPage({ params }: Props) {
   ];
 
   const title = product.title.rendered;
+  const hasDescription = product.content.rendered.trim() !== '';
 
   return (
     <div className="max-w-screen-xl mx-auto px-6 py-8">
@@ -56,8 +57,9 @@ export default async function ProductPage({ params }: Props) {
       </nav>
 
       {/* Two-column layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-        {/* Image */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+
+        {/* Left — image */}
         <div className="relative aspect-square bg-gray-100 overflow-hidden">
           {product.featured_image_url ? (
             <Image
@@ -75,47 +77,55 @@ export default async function ProductPage({ params }: Props) {
           )}
         </div>
 
-        {/* Product info */}
-        <div className="flex flex-col">
-          <h1 className="text-3xl font-bold text-gray-900 uppercase tracking-wide mb-3">
-            {title}
-          </h1>
+        {/* Right — all product info */}
+        <div className="flex flex-col gap-6">
 
-          {/* Categories / Tags */}
-          {(categories.length > 0 || tags.length > 0) && (
-            <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-sm mb-5 pb-5 border-b border-gray-200">
-              {categories.length > 0 && (
-                <>
-                  <span className="text-gray-500">Categories:</span>
-                  {categories.map((c, i) => (
-                    <span key={c.id} className="text-brand font-medium">
-                      {c.name}{i < categories.length - 1 ? ',' : ''}
-                    </span>
-                  ))}
-                </>
-              )}
-              {tags.length > 0 && (
-                <>
-                  {categories.length > 0 && <span className="text-gray-400 mx-0.5">/</span>}
-                  <span className="text-gray-500">Tags:</span>
-                  {tags.map((t, i) => (
-                    <span key={t.id} className="text-brand font-medium">
-                      {t.name}{i < tags.length - 1 ? ',' : ''}
-                    </span>
-                  ))}
-                </>
-              )}
-            </div>
+          {/* Title + taxonomy badges */}
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 uppercase tracking-wide mb-3">
+              {title}
+            </h1>
+
+            {(categories.length > 0 || tags.length > 0) && (
+              <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-sm">
+                {categories.length > 0 && (
+                  <>
+                    <span className="text-gray-500">Categories:</span>
+                    {categories.map((c, i) => (
+                      <span key={c.id} className="text-brand font-medium">
+                        {c.name}{i < categories.length - 1 ? ',' : ''}
+                      </span>
+                    ))}
+                  </>
+                )}
+                {tags.length > 0 && (
+                  <>
+                    {categories.length > 0 && <span className="text-gray-400 mx-0.5">/</span>}
+                    <span className="text-gray-500">Tags:</span>
+                    {tags.map((t, i) => (
+                      <span key={t.id} className="text-brand font-medium">
+                        {t.name}{i < tags.length - 1 ? ',' : ''}
+                      </span>
+                    ))}
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Description — only rendered if content exists */}
+          {hasDescription && (
+            <div
+              className="prose prose-sm max-w-none text-gray-700"
+              dangerouslySetInnerHTML={{ __html: product.content.rendered }}
+            />
           )}
 
-          {/* Description */}
-          <div
-            className="prose prose-sm max-w-none text-gray-700 mb-6"
-            dangerouslySetInnerHTML={{ __html: product.content.rendered }}
-          />
+          {/* Product Details table — in the right column to fill space */}
+          <ProductDetails rows={detailRows} neck={neck} />
 
           {/* CTA */}
-          <div className="mt-auto pt-6 border-t border-gray-200">
+          <div className="pt-4 border-t border-gray-200">
             <p className="text-sm text-gray-500 mb-3">
               Interested in this product? Contact our team to request a sample or get pricing.
             </p>
@@ -132,12 +142,7 @@ export default async function ProductPage({ params }: Props) {
         </div>
       </div>
 
-      {/* Product Details table */}
-      <div className="mt-12">
-        <ProductDetails rows={detailRows} neck={neck} />
-      </div>
-
-      {/* Specs table */}
+      {/* Specifications — full width below, only renders if rows exist */}
       <SpecsTable specs={specs} />
     </div>
   );

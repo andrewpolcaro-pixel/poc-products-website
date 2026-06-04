@@ -98,11 +98,19 @@ add_filter( 'rest_prepare_product', function ( WP_REST_Response $response, WP_Po
         $response->data['featured_image_url'] = null;
     }
 
-    // Decode poc_specs from JSON string → array so the REST client gets native JSON.
-    if ( isset( $response->data['meta']['poc_specs'] ) ) {
-        $decoded = json_decode( $response->data['meta']['poc_specs'], true );
-        $response->data['meta']['poc_specs'] = is_array( $decoded ) ? $decoded : [];
+    // Inject poc_neck and poc_specs directly from post meta.
+    // Reading from get_post_meta() is more reliable than depending on
+    // register_post_meta show_in_rest, which can silently fail if the
+    // plugin is updated without a full deactivation/reactivation cycle.
+    $neck      = get_post_meta( $post->ID, 'poc_neck', true ) ?: '';
+    $specs_raw = get_post_meta( $post->ID, 'poc_specs', true ) ?: '[]';
+    $specs     = json_decode( $specs_raw, true );
+
+    if ( ! isset( $response->data['meta'] ) || ! is_array( $response->data['meta'] ) ) {
+        $response->data['meta'] = [];
     }
+    $response->data['meta']['poc_neck']  = $neck;
+    $response->data['meta']['poc_specs'] = is_array( $specs ) ? $specs : [];
 
     return $response;
 }, 10, 2 );
