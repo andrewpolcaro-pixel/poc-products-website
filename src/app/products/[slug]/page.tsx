@@ -1,5 +1,6 @@
 import { getProduct, getEmbeddedTerms } from '@/lib/wordpress';
 import ProductDetails from '@/components/ProductDetails';
+import SpecsTable from '@/components/SpecsTable';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -14,26 +15,31 @@ export default async function ProductPage({ params }: Props) {
 
   if (!product) notFound();
 
-  const categories        = getEmbeddedTerms(product, 0);
-  const tags              = getEmbeddedTerms(product, 1);
-  const series            = getEmbeddedTerms(product, 2);
-  const neck              = getEmbeddedTerms(product, 3);
-  const capMaterial       = getEmbeddedTerms(product, 4);
-  const actuatorMaterial  = getEmbeddedTerms(product, 5);
-  const pumpBodyMaterial  = getEmbeddedTerms(product, 6);
-  const bottleMaterial    = getEmbeddedTerms(product, 7);
-  const sustainable       = getEmbeddedTerms(product, 8);
-  const markets           = getEmbeddedTerms(product, 9);
+  // Taxonomy term order matches registration in taxonomies.php (neck removed):
+  // 0: category, 1: tag, 2: series,
+  // 3: cap_material, 4: actuator_material, 5: pump_body_material,
+  // 6: bottle_material, 7: sustainable, 8: markets
+  const categories       = getEmbeddedTerms(product, 0);
+  const tags             = getEmbeddedTerms(product, 1);
+  const series           = getEmbeddedTerms(product, 2);
+  const capMaterial      = getEmbeddedTerms(product, 3);
+  const actuatorMaterial = getEmbeddedTerms(product, 4);
+  const pumpBodyMaterial = getEmbeddedTerms(product, 5);
+  const bottleMaterial   = getEmbeddedTerms(product, 6);
+  const sustainable      = getEmbeddedTerms(product, 7);
+  const markets          = getEmbeddedTerms(product, 8);
+
+  const neck = product.meta?.poc_neck ?? '';
+  const specs = product.meta?.poc_specs ?? [];
 
   const detailRows = [
-    { label: 'Series',              terms: series },
-    { label: 'Neck',                terms: neck },
-    { label: 'Cap Material',        terms: capMaterial },
-    { label: 'Actuator Material',   terms: actuatorMaterial },
-    { label: 'Pump Body Material',  terms: pumpBodyMaterial },
-    { label: 'Bottle Material',     terms: bottleMaterial },
-    { label: 'Sustainable',         terms: sustainable },
-    { label: 'Markets',             terms: markets },
+    { label: 'Series',             terms: series },
+    { label: 'Cap Material',       terms: capMaterial },
+    { label: 'Actuator Material',  terms: actuatorMaterial },
+    { label: 'Pump Body Material', terms: pumpBodyMaterial },
+    { label: 'Bottle Material',    terms: bottleMaterial },
+    { label: 'Sustainable',        terms: sustainable },
+    { label: 'Markets',            terms: markets },
   ];
 
   const title = product.title.rendered;
@@ -100,9 +106,16 @@ export default async function ProductPage({ params }: Props) {
             dangerouslySetInnerHTML={{ __html: product.content.rendered }}
           />
 
-          <ProductDetails rows={detailRows} />
+          {/* Neck (meta dropdown) + taxonomy details */}
+          <ProductDetails
+            rows={detailRows}
+            neck={neck}
+          />
         </div>
       </div>
+
+      {/* Full-width specs table below the two-column layout */}
+      <SpecsTable specs={specs} />
     </div>
   );
 }

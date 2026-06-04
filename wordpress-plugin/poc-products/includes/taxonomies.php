@@ -20,7 +20,6 @@ function poc_products_register_taxonomies() {
     $flat_taxonomies = [
         'product_tag'              => [ 'Tag',               'Tags',               'product-tags'               ],
         'product_series'           => [ 'Series',            'Series',             'product-series'             ],
-        'product_neck'             => [ 'Neck',              'Neck Types',         'product-neck'               ],
         'product_cap_material'     => [ 'Cap Material',      'Cap Materials',      'product-cap-materials'      ],
         'product_actuator_material'=> [ 'Actuator Material', 'Actuator Materials', 'product-actuator-materials' ],
         'product_pump_body_material'=> ['Pump Body Material','Pump Body Materials','product-pump-body-materials'],

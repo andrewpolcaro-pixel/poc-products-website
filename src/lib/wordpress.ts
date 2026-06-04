@@ -6,24 +6,37 @@ export interface TaxonomyTerm {
   slug: string;
 }
 
+export interface SpecRow {
+  item: string;
+  capacity: string;
+  dosage: string;
+  height: string;
+  diameter: string;
+  body_height: string;
+  pump_options: string;
+  special_function: string;
+}
+
 export interface Product {
   id: number;
   slug: string;
   title: { rendered: string };
   content: { rendered: string };
   featured_image_url: string | null;
+  meta: {
+    poc_neck: string;
+    poc_specs: SpecRow[];
+  };
   // taxonomy term IDs
   product_category: number[];
   product_tag: number[];
   product_series: number[];
-  product_neck: number[];
   product_cap_material: number[];
   product_actuator_material: number[];
   product_pump_body_material: number[];
   product_bottle_material: number[];
   product_sustainable: number[];
   product_markets: number[];
-  // embedded terms (present when ?_embed=true)
   _embedded?: {
     'wp:term'?: TaxonomyTerm[][];
   };
@@ -56,7 +69,14 @@ export async function getAllMarkets(): Promise<TaxonomyTerm[]> {
   return getTerms('product-markets');
 }
 
-/** Resolve embedded taxonomy terms by position in the _embedded['wp:term'] array. */
+/**
+ * Resolve embedded taxonomy terms by position in _embedded['wp:term'].
+ * Order matches taxonomy registration order in taxonomies.php:
+ *   0: product_category, 1: product_tag, 2: product_series,
+ *   3: product_cap_material, 4: product_actuator_material,
+ *   5: product_pump_body_material, 6: product_bottle_material,
+ *   7: product_sustainable, 8: product_markets
+ */
 export function getEmbeddedTerms(product: Product, index: number): TaxonomyTerm[] {
   return product._embedded?.['wp:term']?.[index] ?? [];
 }

@@ -30,7 +30,7 @@ export default function CatalogPage() {
     return products.filter((p) => {
       const terms = p._embedded?.['wp:term'] ?? [];
       const catSlugs = (terms[0] ?? []).map((t: TaxonomyTerm) => t.slug);
-      const mktSlugs = (terms[9] ?? []).map((t: TaxonomyTerm) => t.slug); // markets at index 9
+      const mktSlugs = (terms[8] ?? []).map((t: TaxonomyTerm) => t.slug); // markets at index 8
 
       if (activeCategory && !catSlugs.includes(activeCategory)) return false;
       if (activeMarket && !mktSlugs.includes(activeMarket)) return false;

@@ -15,6 +15,7 @@ define( 'POC_PRODUCTS_DIR', plugin_dir_path( __FILE__ ) );
 
 require_once POC_PRODUCTS_DIR . 'includes/post-type.php';
 require_once POC_PRODUCTS_DIR . 'includes/taxonomies.php';
+require_once POC_PRODUCTS_DIR . 'includes/meta-fields.php';
 require_once POC_PRODUCTS_DIR . 'includes/headless.php';
 
 register_activation_hook( __FILE__, function () {

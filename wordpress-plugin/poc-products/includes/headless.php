@@ -89,6 +89,7 @@ add_action( 'init', function () {
 // ── Expose featured image URL directly in the products REST response ──────────
 
 add_filter( 'rest_prepare_product', function ( WP_REST_Response $response, WP_Post $post ) {
+    // Featured image URL.
     $thumbnail_id = get_post_thumbnail_id( $post->ID );
     if ( $thumbnail_id ) {
         $src = wp_get_attachment_image_src( $thumbnail_id, 'large' );
@@ -96,5 +97,12 @@ add_filter( 'rest_prepare_product', function ( WP_REST_Response $response, WP_Po
     } else {
         $response->data['featured_image_url'] = null;
     }
+
+    // Decode poc_specs from JSON string → array so the REST client gets native JSON.
+    if ( isset( $response->data['meta']['poc_specs'] ) ) {
+        $decoded = json_decode( $response->data['meta']['poc_specs'], true );
+        $response->data['meta']['poc_specs'] = is_array( $decoded ) ? $decoded : [];
+    }
+
     return $response;
 }, 10, 2 );
