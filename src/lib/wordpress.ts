@@ -67,6 +67,26 @@ export async function getProduct(slug: string): Promise<Product | null> {
   return results[0] ?? null;
 }
 
+/** Fetch a draft product — used only during Next.js Draft Mode preview. */
+export async function getProductDraft(slug: string): Promise<Product | null> {
+  const token = process.env.WP_PREVIEW_TOKEN;
+  if (!token) {
+    console.warn('WP_PREVIEW_TOKEN not set — falling back to published fetch');
+    return getProduct(slug);
+  }
+
+  const res = await fetch(
+    `${WP_API}/products?slug=${slug}&status=any&_embed=true`,
+    {
+      headers: { Authorization: `Basic ${token}` },
+      cache: 'no-store',
+    },
+  );
+  if (!res.ok) return null;
+  const results = (await res.json()) as Product[];
+  return results[0] ?? null;
+}
+
 export async function getTerms(restBase: string): Promise<TaxonomyTerm[]> {
   return apiFetch<TaxonomyTerm[]>(`/${restBase}?per_page=100`);
 }

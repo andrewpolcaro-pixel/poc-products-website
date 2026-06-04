@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Geist } from 'next/font/google';
 import Link from 'next/link';
+import { draftMode } from 'next/headers';
 import './globals.css';
 
 const geist = Geist({ subsets: ['latin'] });
@@ -10,10 +11,21 @@ export const metadata: Metadata = {
   description: 'B2B packaging solutions for skincare and beauty brands.',
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const { isEnabled: isPreview } = await draftMode();
+
   return (
     <html lang="en" className={geist.className}>
       <body className="bg-white text-gray-900 antialiased min-h-screen flex flex-col">
+        {isPreview && (
+          <div className="bg-yellow-400 text-yellow-900 text-sm px-6 py-2 flex items-center justify-between">
+            <span className="font-medium">⚠ Preview Mode — viewing unpublished content</span>
+            <a href="/api/disable-preview" className="underline font-semibold hover:text-yellow-700">
+              Exit Preview
+            </a>
+          </div>
+        )}
+
         <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
           <div className="max-w-screen-xl mx-auto px-6 h-16 flex items-center justify-between">
             <Link href="/" className="text-lg font-bold tracking-tight text-gray-900">

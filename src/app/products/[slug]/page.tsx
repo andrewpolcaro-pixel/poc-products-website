@@ -1,8 +1,9 @@
-import { getProduct, getEmbeddedTerms, TERM_IDX } from '@/lib/wordpress';
+import { getProduct, getProductDraft, getEmbeddedTerms, TERM_IDX } from '@/lib/wordpress';
 import ProductDetails from '@/components/ProductDetails';
 import SpecsTable from '@/components/SpecsTable';
 import Image from 'next/image';
 import Link from 'next/link';
+import { draftMode } from 'next/headers';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 
@@ -18,7 +19,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ProductPage({ params }: Props) {
   const { slug } = await params;
-  const product = await getProduct(slug);
+  const { isEnabled: isPreview } = await draftMode();
+  const product = isPreview ? await getProductDraft(slug) : await getProduct(slug);
   if (!product) notFound();
 
   const categories  = getEmbeddedTerms(product, TERM_IDX.category);

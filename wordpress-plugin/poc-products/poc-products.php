@@ -17,6 +17,7 @@ require_once POC_PRODUCTS_DIR . 'includes/post-type.php';
 require_once POC_PRODUCTS_DIR . 'includes/taxonomies.php';
 require_once POC_PRODUCTS_DIR . 'includes/meta-fields.php';
 require_once POC_PRODUCTS_DIR . 'includes/headless.php';
+require_once POC_PRODUCTS_DIR . 'includes/preview.php';
 
 register_activation_hook( __FILE__, function () {
     poc_products_register_post_type();
