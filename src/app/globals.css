@@ -1,2 +1,7 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
+
+@theme {
+  --color-brand: #0071ce;
+  --color-brand-dark: #005ba3;
+}

@@ -27,7 +27,6 @@ export interface Product {
     poc_neck: string;
     poc_specs: SpecRow[];
   };
-  // taxonomy term IDs
   product_category: number[];
   product_tag: number[];
   product_series: number[];
@@ -37,10 +36,21 @@ export interface Product {
   product_bottle_material: number[];
   product_sustainable: number[];
   product_markets: number[];
-  _embedded?: {
-    'wp:term'?: TaxonomyTerm[][];
-  };
+  _embedded?: { 'wp:term'?: TaxonomyTerm[][] };
 }
+
+// Embedded term index map — matches taxonomy registration order in taxonomies.php
+export const TERM_IDX = {
+  category:         0,
+  tag:              1,
+  series:           2,
+  capMaterial:      3,
+  actuatorMaterial: 4,
+  pumpBodyMaterial: 5,
+  bottleMaterial:   6,
+  sustainable:      7,
+  markets:          8,
+} as const;
 
 async function apiFetch<T>(path: string): Promise<T> {
   const res = await fetch(`${WP_API}${path}`, { next: { revalidate: 60 } });
@@ -57,26 +67,15 @@ export async function getProduct(slug: string): Promise<Product | null> {
   return results[0] ?? null;
 }
 
-export async function getTerms(taxonomy: string): Promise<TaxonomyTerm[]> {
-  return apiFetch<TaxonomyTerm[]>(`/${taxonomy}?per_page=100`);
+export async function getTerms(restBase: string): Promise<TaxonomyTerm[]> {
+  return apiFetch<TaxonomyTerm[]>(`/${restBase}?per_page=100`);
 }
 
-export async function getAllCategories(): Promise<TaxonomyTerm[]> {
-  return getTerms('product-categories');
-}
+export const getAllCategories  = () => getTerms('product-categories');
+export const getAllSeries      = () => getTerms('product-series');
+export const getAllMarkets     = () => getTerms('product-markets');
+export const getAllSustainable = () => getTerms('product-sustainable');
 
-export async function getAllMarkets(): Promise<TaxonomyTerm[]> {
-  return getTerms('product-markets');
-}
-
-/**
- * Resolve embedded taxonomy terms by position in _embedded['wp:term'].
- * Order matches taxonomy registration order in taxonomies.php:
- *   0: product_category, 1: product_tag, 2: product_series,
- *   3: product_cap_material, 4: product_actuator_material,
- *   5: product_pump_body_material, 6: product_bottle_material,
- *   7: product_sustainable, 8: product_markets
- */
 export function getEmbeddedTerms(product: Product, index: number): TaxonomyTerm[] {
   return product._embedded?.['wp:term']?.[index] ?? [];
 }
